@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Users {
+  userId String @id @default(uuid())
+  email String @unique
+  password String?
+  fullName String
+  role UserStatus @default(FARMER)
+  listing Listings[]
+  cropScan CropScans[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum UserStatus {
+  FARMER
+  BUYER
+}
+
+model Listings {
+  listingId String @id @default(uuid())
+  title String
+  description String
+  price Decimal
+  quantity Int
+  category Categories @default(CROPS)
+  location String
+  farmer Users @relation(fields: [farmerId], references: [userId])
+  farmerId String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum Categories {
+  CROPS
+  LIVESTOCK
+  PRODUCE
+  OTHER
+}
+
+model CropScans {
+  cropScanId String @id @default(uuid())
+  farmer Users @relation(fields: [farmerId], references: [userId])
+  farmerId String
+  healthStatus HealthStatus
+  spoilageRisk SpoilageRisk
+  confidenceScore Int
+  recommendation String
+  createdAt DateTime  @default(now())
+}
+
+enum HealthStatus {
+  GOOD
+  DISEASED
+  BAD
+}
+
+enum SpoilageRisk {
+  LOW
+  MEDIUM
+  HIGH
+}
