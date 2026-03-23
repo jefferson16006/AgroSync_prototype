@@ -9,8 +9,6 @@ export const fileNameEditor = (
 ) => {
     const filename: string = uuidv4();
     const extension: string = extname(file.originalname);
-      
-    // This tells Multer what the new name is
     callback(null, `${filename}${extension}`);
 }
 
@@ -22,7 +20,7 @@ export const imageFileFilter = (
   callback: (error: any, valid: boolean) => void,
 ) => {
   if (!file.originalname.match(/\.(jpg|jpeg|png|webp)$/)) {
-    return callback(new BadRequestException('Only image files are allowed!'), false);
+    return callback(new BadRequestException('Only image files are allowed'), false);
   }
 
   const allowedMimeTypes = [
@@ -33,7 +31,7 @@ export const imageFileFilter = (
   ];
 
   if (!allowedMimeTypes.includes(file.mimetype)) {
-    return callback(new Error('Invalid file type. Only images are allowed.'), false);
+    return callback(new Error('Invalid file type: only images are allowed'), false);
   }
 
   callback(null, true);

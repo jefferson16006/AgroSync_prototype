@@ -19,7 +19,8 @@ export const FILE_UPLOAD_DIR = join(process.cwd(), 'src', 'uploads');
     }),
     MulterModule.register({
       storage: diskStorage({
-        filename: fileNameEditor
+        filename: fileNameEditor,
+        destination: FILE_UPLOAD_DIR
       }),
       dest: FILE_UPLOAD_DIR,
       limits: {
