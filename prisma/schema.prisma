@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  // output   = "../generated/prisma"
 }
 
 datasource db {
@@ -8,15 +7,15 @@ datasource db {
 }
 
 model Users {
-  userId String @id @default(uuid())
-  email String @unique
-  password String?
-  fullName String
-  role UserStatus @default(FARMER)
-  listing Listings[]
-  cropScan CropScans[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  userId    String      @id @default(uuid())
+  email     String      @unique
+  password  String?
+  fullName  String
+  role      UserStatus  @default(FARMER)
+  listings  Listings[]  @relation("UserListings")
+  cropScans CropScans[] @relation("UserCropScans")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }
 
 enum UserStatus {
@@ -25,17 +24,19 @@ enum UserStatus {
 }
 
 model Listings {
-  listingId String @id @default(uuid())
-  title String
+  listingId   String     @id @default(uuid())
+  title       String
   description String
-  price Decimal
-  quantity Int
-  category Categories @default(CROPS)
-  location String
-  farmer Users @relation(fields: [farmerId], references: [userId])
-  farmerId String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  price       Decimal
+  quantity    Int
+  category    Categories @default(CROPS)
+  location    String
+  farmer      Users      @relation("UserListings", fields: [farmerId], references: [userId])
+  farmerId    String
+  scan        CropScans?  @relation(fields: [scanId], references: [cropScanId])
+  scanId      String?     @unique
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 enum Categories {
@@ -46,14 +47,15 @@ enum Categories {
 }
 
 model CropScans {
-  cropScanId String @id @default(uuid())
-  farmer Users @relation(fields: [farmerId], references: [userId])
-  farmerId String
-  healthStatus HealthStatus
-  spoilageRisk SpoilageRisk
+  cropScanId      String       @id @default(uuid())
+  farmer          Users        @relation("UserCropScans", fields: [farmerId], references: [userId])
+  farmerId        String
+  healthStatus    HealthStatus
+  spoilageRisk    SpoilageRisk
   confidenceScore Int
-  recommendation String
-  createdAt DateTime  @default(now())
+  recommendation  String
+  listing         Listings?
+  createdAt       DateTime     @default(now())
 }
 
 enum HealthStatus {
@@ -66,4 +68,14 @@ enum SpoilageRisk {
   LOW
   MEDIUM
   HIGH
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  listingId   String
+  amount      Int      
+  email       String
+  status      String   // pending | success | failed
+  reference   String   @unique
+  createdAt   DateTime @default(now())
 }

@@ -1,98 +1,259 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# AgroSync Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+AgroSync is a digital marketplace designed to connect farmers directly with buyers, eliminating middlemen and improving transparency, pricing, and trust in agricultural trade. This backend powers authentication, listings, crop verification via AI, and transaction flows.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Overview
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+AgroSync enables:
 
-## Project setup
+* Farmers to list crops and livestock for sale
+* Buyers to browse and connect directly with farmers
+* AI-assisted crop verification to improve trust
+* A structured backend API for seamless frontend integration
 
-```bash
-$ pnpm install
+This backend is built for scalability, modularity, and rapid iteration, making it suitable for both hackathon environments and real-world extension.
+
+---
+
+## Core Features
+
+### 1. Authentication & Authorization
+
+* User registration and login (JWT-based authentication)
+* Role-based access control (Farmer / Buyer)
+* Protected routes using guards
+
+---
+
+### 2. Marketplace Listings
+
+Farmers can:
+
+* Create listings for crops or livestock
+* Update or delete their listings
+
+Buyers and users can:
+
+* View all listings
+* View individual listings
+
+Each listing contains:
+
+* Title
+* Description
+* Price
+* Quantity
+* Location
+* Category
+
+---
+
+### 3. AI Crop Verification
+
+Farmers can upload images of crops for analysis.
+
+The system is designed to:
+
+* Accept image uploads
+* Send images to an AI model
+* Receive structured analysis
+* Store results in the database
+
+Each crop scan contains:
+
+* Health status (GOOD / DISEASED / BAD)
+* Spoilage risk (LOW / MEDIUM / HIGH)
+* Confidence score (How sure the model is about its own answer)
+* Recommendation
+
+---
+
+### 4. Verified Listings
+
+Listings can optionally be linked to a crop scan.
+
+* Listings with a scan are marked as **verified**
+* Buyers can see crop health insights before purchasing
+
+This improves trust and transparency in the marketplace.
+
+---
+
+### 5. Payment Flow (Minimal Integration)
+
+The backend includes a lightweight payment structure:
+
+* Initialize payment
+* Redirect user to payment provider
+
+This is designed for demonstration and can be extended into a full payment system.
+
+---
+
+## System Architecture
+
+The system follows a modular structure:
+
+* **Auth Module** → Handles authentication and JWT
+* **Users Module** → Manages user data
+* **Listings Module** → Core marketplace logic
+* **AI Module** → Crop scan and analysis pipeline
+* **Payments Module** → Transaction handling (Interswitch)
+
+Data relationships:
+
+* A **User** can be a Farmer or Buyer
+* A **Farmer** owns many Listings
+* A **CropScan** belongs to a Farmer
+* A **Listing** can optionally reference a CropScan
+
+---
+
+## API Design
+
+All endpoints follow REST principles.
+
+### Authentication
+
+```
+POST /auth/signup
+POST /auth/login
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ pnpm run start
+### Listings
 
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+```
+POST   /listings
+GET    /listings
+GET    /listings/:id
+PATCH  /listings/:id
+DELETE /listings/:id
 ```
 
-## Run tests
+#### Create Listing Example
 
-```bash
-# unit tests
-$ pnpm run test
+```
+POST /listings
+Authorization: Bearer <token>
+Content-Type: application/json
 
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+{
+  "title": "Fresh Tomatoes",
+  "description": "Organic farm produce",
+  "price": "5000",
+  "quantity": 10,
+  "location": "Ibadan",
+  "category": "Crops",
+  "scanId": "optional-scan-id"
+}
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### AI Crop Scan
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+```
+POST /ai/scan
+GET  /ai/scans
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+#### Upload Example
 
-## Resources
+```
+POST /ai/scan
+Authorization: Bearer <token>
 
-Check out a few resources that may come in handy when working with NestJS:
+file: <image>
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+### Payments
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```
+POST /payments/initialize
+```
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Development Setup
 
-## License
+### Install Dependencies
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```
+pnpm install
+```
+
+### Setup Environment Variables
+
+Create a `.env` file:
+
+```
+DATABASE_URL=your_db_url
+JWT_SECRET=your_jwt_secret
+GROQ_API_KEY=your_groq_api_key
+INTERSWITCH_MERCHANT_CODE=merchant_code
+INTERSWITCH_PAY_ITEM_ID=your_interswitch_pay_item
+INTERSWITCH_REDIRECT_URL=your_interswitch_redirect_url
+INTERSWITCH_BASE_URL=your_interswitch_base_url
+INTERSWITCH_QUERY_URL=your_interswitch_query_url
+```
+
+### Run Database
+
+```
+npx(or pnpm) prisma migrate dev
+npx(or pnpm) prisma generate
+```
+
+### Start Server
+
+```
+pnpm start:dev
+```
+
+---
+
+## File Uploads
+
+* Images are stored locally in `/uploads`
+* File paths are saved in the database
+* Used for AI processing and future retrieval
+
+---
+
+## Current Limitations
+
+* Payment flow is minimal (demo-level)
+* No real-time chat implemented
+
+---
+
+## Project Goal
+
+AgroSync aims to:
+
+* Empower farmers with direct market access
+* Improve buyer confidence using AI verification
+* Reduce inefficiencies in agricultural trade
+
+---
+
+## Deployment (Render)
+
+* Connect GitHub repository
+* Set environment variables
+* Use:
+
+  * Build: `pnpm install && pnpm prisma generate`
+  * Start: `pnpm start:prod`
+
+---
+
+## Final Note
+
+This project is built with a focus on clean architecture, extensibility, and real-world applicability. While some features are still in progress, the core system demonstrates a complete and scalable backend for an agricultural marketplace.

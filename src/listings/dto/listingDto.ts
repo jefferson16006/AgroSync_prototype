@@ -25,6 +25,10 @@ export class CreateListingDto {
   @IsString()
   @IsNotEmpty()
   location: string
+
+  @IsString()
+  @IsOptional()
+  scanId: string
 }
 
 export class UpdateListingDto {

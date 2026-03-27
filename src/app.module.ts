@@ -9,8 +9,8 @@ import { MulterModule } from '@nestjs/platform-express';
 import { join } from 'path';
 import { diskStorage } from 'multer';
 import { fileNameEditor, imageFileFilter } from './utils/filter';
+import { PaymentsModule } from './payments/payments.module';
 
-export const FILE_UPLOAD_DIR = join(process.cwd(), 'src', 'uploads');
 
 @Module({
   imports: [
@@ -20,9 +20,9 @@ export const FILE_UPLOAD_DIR = join(process.cwd(), 'src', 'uploads');
     MulterModule.register({
       storage: diskStorage({
         filename: fileNameEditor,
-        destination: FILE_UPLOAD_DIR
+        destination: './uploads'
       }),
-      dest: FILE_UPLOAD_DIR,
+      dest: './uploads',
       limits: {
         fileSize: 5 * 1024 * 1024,
         files: 5,
@@ -36,6 +36,7 @@ export const FILE_UPLOAD_DIR = join(process.cwd(), 'src', 'uploads');
     AuthModule,
     ListingsModule,
     AiModule,
+    PaymentsModule,
   ]
 })
 export class AppModule {}

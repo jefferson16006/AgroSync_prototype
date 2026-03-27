@@ -11,6 +11,21 @@ export class ListingsService {
   // Create listing
   async createListing(userId: string, dto: CreateListingDto) {
     try {
+  
+      if (dto.scanId) {
+        const scan = await this.prisma.cropScans.findUnique({
+          where: { cropScanId: dto.scanId }
+        });
+  
+        if (!scan) {
+          throw new NotFoundException('Scan not found');
+        }
+  
+        if (scan.farmerId !== userId) {
+          throw new ForbiddenException("You cannot use another farmer's scan");
+        }
+      }
+  
       await this.prisma.listings.create({
         data: {
           farmer: {
@@ -22,15 +37,17 @@ export class ListingsService {
           quantity: dto.quantity,
           location: dto.location,
           category: dto.category,
+          scan: dto.scanId
+            ? { connect: { cropScanId: dto.scanId } }
+            : undefined,
         }
-      })
+      });
   
-      const response = {
-        "status": "Success",
-        "msg": "Listing has been created"
+      return {
+        status: "Success",
+        msg: "Listing has been created"
       };
   
-      return response;
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError) {
         if (err.code === 'P2003') {
@@ -46,22 +63,36 @@ export class ListingsService {
 
   // Get all listing
   async getAllListings(fullName: string) {
-    const listings = await this.prisma.listings.findMany();
-
-    if(listings.length === 0) {
+    const listings = await this.prisma.listings.findMany({
+      include: {
+        scan: true
+      }
+    });
+  
+    if (listings.length === 0) {
       throw new NotFoundException('No listings');
     }
-
-    const response = {
-      "status": "Success",
-      "msg": "All listings retrieved",
-      "data": {
-        "fullName": fullName,
-        listings
+  
+    const formattedListings = listings.map(listing => ({
+      ...listing,
+      verified: !!listing.scan,
+      scan: listing.scan
+        ? {
+            healthStatus: listing.scan.healthStatus,
+            spoilageRisk: listing.scan.spoilageRisk,
+            confidenceScore: listing.scan.confidenceScore,
+          }
+        : null
+    }));
+  
+    return {
+      status: "Success",
+      msg: "All listings retrieved",
+      data: {
+        fullName,
+        listings: formattedListings
       }
-    }
-
-    return response;
+    };
   }
 
   // Get single listing
